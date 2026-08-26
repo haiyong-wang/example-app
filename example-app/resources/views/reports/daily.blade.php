@@ -272,9 +272,9 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{{ number_format($todayTotal) }}</td>
-                                <td>{{ number_format($todayHit) }}</td>
-                                <td>{{ number_format($todayRate, 2) }}</td>
+                                <td id="today-total">-</td>
+                                <td id="today-hit">-</td>
+                                <td id="today-rate">-</td>
                             </tr>
                         </tbody>
                     </table>
@@ -286,13 +286,13 @@
                 <div class="card-title">日报明细</div>
 
                 <!-- 筛选表单 -->
-                <form method="get" action="{{ url('/reports/daily') }}" class="filter-bar">
+                <form id="filter-form" class="filter-bar">
                     <label>日期筛选</label>
-                    <input type="date" name="start_date" value="{{ $startDate }}">
+                    <input type="date" name="start_date">
                     <span style="color:#c0c4cc;">至</span>
-                    <input type="date" name="end_date" value="{{ $endDate }}">
+                    <input type="date" name="end_date">
                     <button type="submit" class="btn">查询</button>
-                    <a href="{{ url('/reports/daily') }}" class="btn">重置</a>
+                    <button type="button" id="btn-reset" class="btn">重置</button>
                 </form>
 
                 <!-- 数据表 -->
@@ -305,42 +305,175 @@
                             <th>命中比例(%)</th>
                         </tr>
                     </thead>
-                    <tbody>
-                    @if (count($paginator) === 0)
-                        <tr><td colspan="4" style="text-align:center;color:#909399;padding:30px;">暂无数据</td></tr>
-                    @else
-                        @foreach ($paginator as $row)
-                            <tr>
-                                <td>{{ $row['stat_date'] }}</td>
-                                <td>{{ number_format($row['query_count']) }}</td>
-                                <td>{{ number_format($row['hit_count']) }}</td>
-                                <td>{{ number_format($row['hit_rate'], 2) }}</td>
-                            </tr>
-                        @endforeach
-                    @endif
+                    <tbody id="report-tbody">
+                        <tr>
+                            <td colspan="4" style="text-align:center;color:#909399;padding:30px;">
+                                <span id="table-status">加载中...</span>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
 
                 <!-- 分页 -->
-                @if ($paginator->total() > 0)
-                <div class="pagination-bar">
-                    共 {{ $paginator->total() }} 条
-                    <form method="get" action="{{ url('/reports/daily') }}" style="display:inline;">
-                        <input type="hidden" name="start_date" value="{{ $startDate }}">
-                        <input type="hidden" name="end_date" value="{{ $endDate }}">
-                        <select name="per_page" onchange="this.form.submit()">
-                            @foreach ([10, 20, 50, 100] as $pp)
-                                <option value="{{ $pp }}" {{ $perPage == $pp ? 'selected' : '' }}>{{ $pp }}条/页</option>
-                            @endforeach
-                        </select>
-                    </form>
+                <div id="pagination-bar" class="pagination-bar" style="display:none;">
+                    <span id="page-total">共 0 条</span>
+                    <button type="button" id="btn-prev" class="btn">上一页</button>
+                    <span id="page-current">1/1</span>
+                    <button type="button" id="btn-next" class="btn">下一页</button>
+                    <select id="per-page">
+                        @foreach ([10, 20, 50, 100] as $pp)
+                            <option value="{{ $pp }}">{{ $pp }}条/页</option>
+                        @endforeach
+                    </select>
                 </div>
-                @endif
             </div>
 
         </div>
 
     </main>
 </div>
+
+<script>
+(function () {
+    // 状态
+    var state = {
+        startDate: '',
+        endDate: '',
+        page: 1,
+        perPage: 10
+    };
+
+    var tbody = document.getElementById('report-tbody');
+    var tableStatus = document.getElementById('table-status');
+    var form = document.getElementById('filter-form');
+    var startInput = form.querySelector('input[name="start_date"]');
+    var endInput = form.querySelector('input[name="end_date"]');
+    var paginationBar = document.getElementById('pagination-bar');
+    var pageTotal = document.getElementById('page-total');
+    var pageCurrent = document.getElementById('page-current');
+    var btnPrev = document.getElementById('btn-prev');
+    var btnNext = document.getElementById('btn-next');
+    var perPageSelect = document.getElementById('per-page');
+
+    function buildQuery(params) {
+        var qs = new URLSearchParams();
+        if (params.startDate) qs.set('start_date', params.startDate);
+        if (params.endDate) qs.set('end_date', params.endDate);
+        qs.set('page', params.page);
+        qs.set('per_page', params.perPage);
+        return qs.toString();
+    }
+
+    function numberFormat(n) {
+        return Number(n || 0).toLocaleString();
+    }
+
+    function renderToday(today) {
+        document.getElementById('today-total').textContent = numberFormat(today.total);
+        document.getElementById('today-hit').textContent = numberFormat(today.hit);
+        document.getElementById('today-rate').textContent = Number(today.rate).toFixed(2);
+    }
+
+    function renderList(list) {
+        tbody.innerHTML = '';
+        if (!list.length) {
+            var tr = document.createElement('tr');
+            var td = document.createElement('td');
+            td.setAttribute('colspan', '4');
+            td.style.cssText = 'text-align:center;color:#909399;padding:30px;';
+            td.textContent = '暂无数据';
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+            return;
+        }
+        list.forEach(function (row) {
+            var tr = document.createElement('tr');
+            var cells = [
+                row.stat_date,
+                numberFormat(row.query_count),
+                numberFormat(row.hit_count),
+                Number(row.hit_rate).toFixed(2)
+            ];
+            cells.forEach(function (text) {
+                var td = document.createElement('td');
+                td.textContent = text;
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderPagination(p) {
+        if (!p.total) {
+            paginationBar.style.display = 'none';
+            return;
+        }
+        paginationBar.style.display = 'flex';
+        pageTotal.textContent = '共 ' + numberFormat(p.total) + ' 条';
+        pageCurrent.textContent = p.current + '/' + p.last_page;
+        btnPrev.disabled = p.current <= 1;
+        btnNext.disabled = p.current >= p.last_page;
+    }
+
+    function loadData() {
+        tableStatus.textContent = '加载中...';
+        var url = '{{ url('/reports/daily/data') }}' + '?' + buildQuery(state);
+        fetch(url)
+            .then(function (res) {
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.json();
+            })
+            .then(function (json) {
+                if (json.code !== 0) throw new Error(json.message || '数据异常');
+                renderToday(json.data.today);
+                renderList(json.data.list);
+                renderPagination(json.data.pagination);
+                startInput.value = json.data.filters.start_date || '';
+                endInput.value = json.data.filters.end_date || '';
+            })
+            .catch(function (err) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#f56c6c;padding:30px;">加载失败: ' + err.message + '</td></tr>';
+                paginationBar.style.display = 'none';
+            });
+    }
+
+    // 筛选查询
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        state.startDate = startInput.value;
+        state.endDate = endInput.value;
+        state.page = 1;
+        loadData();
+    });
+
+    // 重置
+    document.getElementById('btn-reset').addEventListener('click', function () {
+        startInput.value = '';
+        endInput.value = '';
+        state.startDate = '';
+        state.endDate = '';
+        state.page = 1;
+        perPageSelect.value = '10';
+        state.perPage = 10;
+        loadData();
+    });
+
+    // 分页
+    btnPrev.addEventListener('click', function () {
+        if (state.page > 1) { state.page--; loadData(); }
+    });
+    btnNext.addEventListener('click', function () {
+        state.page++; loadData();
+    });
+    perPageSelect.addEventListener('change', function () {
+        state.perPage = parseInt(perPageSelect.value, 10) || 10;
+        state.page = 1;
+        loadData();
+    });
+
+    // 初始加载
+    loadData();
+})();
+</script>
 </body>
 </html>

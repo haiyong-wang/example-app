@@ -20,11 +20,26 @@ class PhoneReportController extends Controller
      * 机型筛选日报页面
      *
      * GET /reports/daily
+     * 仅渲染页面骨架, 数据由前端异步请求 GET /reports/daily/data 获取
      *
      * @param Request $request
      * @return \Illuminate\View\View
      */
     public function daily(Request $request)
+    {
+        return view('reports.daily');
+    }
+
+    /**
+     * 机型筛选日报数据接口 (异步请求)
+     *
+     * GET /reports/daily/data
+     * 返回今日数据 + 日报明细(分页) + 日期筛选条件
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function dailyData(Request $request)
     {
         // 筛选日期(默认展示全部)
         $startDate = $request->input('start_date');
@@ -48,26 +63,29 @@ class PhoneReportController extends Controller
 
         $total = count($stats);
         $paged = array_slice($stats, ($page - 1) * $perPage, $perPage);
+        $lastPage = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
 
-        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-            $paged,
-            $total,
-            $perPage,
-            $page,
-            [
-                'path'  => url()->current(),
-                'query' => $request->query(),
-            ]
-        );
-
-        return view('reports.daily', [
-            'paginator'   => $paginator,
-            'todayTotal'  => $todayTotal,
-            'todayHit'    => $todayHit,
-            'todayRate'   => $todayRate,
-            'startDate'   => $startDate,
-            'endDate'     => $endDate,
-            'perPage'     => $perPage,
+        return response()->json([
+            'code'    => 0,
+            'message' => 'ok',
+            'data'    => [
+                'today'     => [
+                    'total' => $todayTotal,
+                    'hit'   => $todayHit,
+                    'rate'  => $todayRate,
+                ],
+                'list'      => array_values($paged),
+                'pagination' => [
+                    'total'     => $total,
+                    'per_page'  => $perPage,
+                    'current'   => $page,
+                    'last_page' => $lastPage,
+                ],
+                'filters'   => [
+                    'start_date' => $startDate,
+                    'end_date'   => $endDate,
+                ],
+            ],
         ]);
     }
 

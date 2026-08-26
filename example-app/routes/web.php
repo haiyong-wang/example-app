@@ -25,8 +25,11 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 
-// 机型筛选日报
+// 机型筛选日报(页面骨架)
 Route::get('/reports/daily', [PhoneReportController::class, 'daily']);
+
+// 机型筛选日报数据(异步 JSON 接口)
+Route::get('/reports/daily/data', [PhoneReportController::class, 'dailyData']);
 
 /*
 |--------------------------------------------------------------------------
