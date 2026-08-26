@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PhoneModelController;
 use App\Http\Controllers\PhoneQueryJobController;
+use App\Http\Controllers\TestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +36,15 @@ Route::group(['prefix' => 'phone-model'], function () {
     // GET /api/phone-model/query/{id}
     Route::get('query/{id}', [PhoneModelController::class, 'show']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| 测试接口
+|--------------------------------------------------------------------------
+*/
+
+// 连通性测试: GET /api/test
+Route::get('test', [TestController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
