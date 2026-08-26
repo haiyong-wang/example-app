@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PhoneReportController;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,3 +27,12 @@ Route::get('/', function () {
 
 // 机型筛选日报
 Route::get('/reports/daily', [PhoneReportController::class, 'daily']);
+
+/*
+|--------------------------------------------------------------------------
+| 产品中心
+|--------------------------------------------------------------------------
+*/
+
+// 产品中心(默认手机产品)
+Route::get('/products', [ProductController::class, 'index']);

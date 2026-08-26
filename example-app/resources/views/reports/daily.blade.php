@@ -229,9 +229,8 @@
     <aside class="sidebar">
         <div class="sidebar-logo">⚡ 焦皮的大项目</div>
         <div class="menu">
-            <a class="menu-item" href="#">🏠 首页</a>
-            <div class="menu-section">📦 产品中心</div>
-            <a class="menu-item active" href="{{ url('/reports/daily') }}">📱 机型筛选</a>
+            <a class="menu-item" href="{{ url('/') }}">🏠 首页</a>
+            <a class="menu-item active" href="{{ url('/reports/daily') }}">📊 机型筛选</a>
         </div>
     </aside>
 
@@ -241,8 +240,6 @@
         <!-- 顶部面包屑 -->
         <div class="topbar">
             套餐
-            <span class="sep">/</span>
-            产品中心
             <span class="sep">/</span>
             机型筛选
         </div>
