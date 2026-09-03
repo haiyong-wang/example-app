@@ -273,11 +273,10 @@
 
 <script>
 (function () {
-    // 后端兜底初值
+    // 后端兜底初值（DB 里当前累计秒数 + 进行中已流逝秒数）
     var running = {{ $isRunning ? 'true' : 'false' }};
     var runningSeconds = {{ $initRunningSeconds }};
     var todaySeconds = {{ $initTodaySeconds }};
-    var lastStatusRunning = running;
 
     // 心跳用 CSRF
     var csrfToken = '{{ csrf_token() }}';
@@ -315,16 +314,27 @@
         }
     }
 
-    // 秒级本地计数
-    var ticker = null;
-    function startTicker() {
-        if (ticker) clearInterval(ticker);
-        ticker = setInterval(function () {
-            if (running) { runningSeconds += 1; todaySeconds += 1; }
-            render();
-        }, 1000);
+    // 秒级本地计数：进行中时本地累加显示，真实累计以心跳/校准返回的后端值为准
+    var ticker = setInterval(function () {
+        if (running) {
+            runningSeconds += 1;
+            todaySeconds += 1;
+        }
+        render();
+    }, 1000);
+
+    // 以后端返回的绝对秒数作为基准覆盖本地值（两者对齐，不整页刷新）
+    function applySync(runningNow, runningSec, todaySec) {
+        running = !!runningNow;
+        if (running) {
+            runningSeconds = runningSec;
+        } else {
+            runningSeconds = 0;
+        }
+        todaySeconds = todaySec;
+        refreshState();
+        render();
     }
-    startTicker();
 
     // 发送心跳（自动开启/刷新会话）
     function sendHeartbeat() {
@@ -339,36 +349,21 @@
             body: '{}',
             credentials: 'same-origin'
         }).then(function (r) { return r.json(); }).then(function (d) {
-            if (d && d.running) {
-                running = true;
-                runningSeconds = d.running_seconds;
-                todaySeconds = d.today_seconds;
+            if (d && d.ok) {
+                applySync(d.running, d.running_seconds, d.today_seconds);
             }
-            refreshState();
-            render();
-            return d;
         }).catch(function () {
-            // 心跳失败不阻塞页面
+            // 心跳失败不阻塞页面，下个周期会重试
         });
     }
 
-    // 校准状态（感知其他标签页/异常离线导致的会话结算，必要时刷新以展示最新明细）
+    // 校准状态：只做数据对齐，绝不整页刷新（避免刷新导致的计时中断）
     function pollStatus() {
         return fetch('{{ url('/slack/status') }}', {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'same-origin'
         }).then(function (r) { return r.json(); }).then(function (d) {
-            var wasRunning = running;
-            running = !!d.running;
-            runningSeconds = d.running_seconds;
-            todaySeconds = d.today_seconds;
-            if (running !== wasRunning || (wasRunning && !d.running)) {
-                // 会话状态发生变化（例如发生了分段结算），刷新以更新明细/按钮
-                window.location.reload();
-                return;
-            }
-            refreshState();
-            render();
+            applySync(d.running, d.running_seconds, d.today_seconds);
         }).catch(function () {});
     }
 

@@ -131,6 +131,17 @@
 
         <a class="menu-item @if($current === 'slack') active @endif" href="{{ url('/slack') }}">摸鱼时长</a>
 
+        <div class="menu-group @if(in_array($current, ['slack-topics-new', 'slack-topics-list', 'slack-topic-show'])) open @endif">
+            <div class="menu-item menu-group-title">
+                摸鱼话题
+                <span class="caret">▸</span>
+            </div>
+            <div class="sub-menu">
+                <a class="sub-item @if($current === 'slack-topics-list') active @endif" href="{{ url('/slack-topics/list') }}">话题列表</a>
+                <a class="sub-item @if($current === 'slack-topics-new') active @endif" href="{{ url('/slack-topics/create') }}">创建话题</a>
+            </div>
+        </div>
+
 {{--        <div class="menu-group @if($current === 'daily') open @endif">--}}
 {{--            <div class="menu-item menu-group-title">--}}
 {{--                数据中心--}}

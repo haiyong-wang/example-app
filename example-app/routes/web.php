@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ToolsController;
 use App\Http\Controllers\GamesController;
 use App\Http\Controllers\SlackController;
+use App\Http\Controllers\SlackTopicController;
 
 /*
 |--------------------------------------------------------------------------
@@ -119,4 +120,25 @@ Route::middleware('auth')->group(function () {
 
     // 实时摸鱼时长(异步 JSON，页面轮询校准用)
     Route::get('/slack/status', [SlackController::class, 'status'])->name('slack.status');
+
+    /*
+    |--------------------------------------------------------------------------
+    | 群聊摸鱼话题导航
+    |--------------------------------------------------------------------------
+    */
+
+    // 独立的话题列表页：浏览话题并在这里发起新话题（原 /slack-topics 新增页已下线）
+    Route::get('/slack-topics/list', [SlackTopicController::class, 'list'])->name('slack-topics.list');
+
+    // 新建话题表单页：填写标题、日期、背景说明后提交创建
+    Route::get('/slack-topics/create', [SlackTopicController::class, 'create'])->name('slack-topics.create');
+
+    // 新增每日摸鱼话题
+    Route::post('/slack-topics', [SlackTopicController::class, 'store'])->name('slack-topics.store');
+
+    // 话题详情：查看讨论的具体内容、谁发表了什么意见
+    Route::get('/slack-topics/{slackTopic}', [SlackTopicController::class, 'show'])->name('slack-topics.show');
+
+    // 在话题下发表意见
+    Route::post('/slack-topics/{slackTopic}/comments', [SlackTopicController::class, 'storeComment'])->name('slack-topics.comments.store');
 });

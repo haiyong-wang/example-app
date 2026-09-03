@@ -68,4 +68,24 @@ class User extends Authenticatable
             ->latest('started_at')
             ->first();
     }
+
+    /**
+     * 该用户发起的摸鱼话题
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function slackTopics()
+    {
+        return $this->hasMany(SlackTopic::class);
+    }
+
+    /**
+     * 该用户在群聊摸鱼话题下发表的发言
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function slackTopicComments()
+    {
+        return $this->hasMany(SlackTopicComment::class);
+    }
 }
