@@ -249,7 +249,7 @@
                     <div class="subtitle" id="merit-sub">愿今天的烦心事，都随木鱼声消散</div>
 
                     <div class="controls">
-                        <button type="button" class="btn" id="btn-toggle">⏸ 暂停自动敲</button>
+                        <button type="button" class="btn" id="btn-toggle">⏸ 开始自动敲</button>
                         <button type="button" class="btn" id="btn-reset">↺ 重置功德</button>
                     </div>
                 </div>
@@ -339,11 +339,11 @@
         autoOn = !autoOn;
         if (autoOn) {
             startAuto();
-            btnToggle.textContent = '▶ 继续自动敲';
+            btnToggle.textContent = '⏸ 暂停自动敲';
             showToast('自动摸鱼模式已开启 🐟');
         } else {
             stopAuto();
-            btnToggle.textContent = '⏸ 暂停自动敲';
+            btnToggle.textContent = '▶ 继续自动敲';
             showToast('已暂停，老板来了快收好');
         }
     });
