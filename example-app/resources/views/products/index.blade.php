@@ -198,16 +198,7 @@
 <body>
 <div class="layout">
 
-    <!-- 左侧菜单 -->
-    <aside class="sidebar">
-        <div class="sidebar-logo">⚡ 焦皮的大项目</div>
-        <div class="menu">
-            <a class="menu-item" href="{{ url('/') }}">🏠 首页</a>
-            <div class="menu-section">📦 产品中心</div>
-            <a class="menu-item active" href="{{ url('/products') }}">📱 手机产品</a>
-            <a class="menu-item" href="{{ url('/reports/daily') }}">📊 机型筛选</a>
-        </div>
-    </aside>
+    @include('layouts.sidebar', ['activeMenu' => 'products'])
 
     <!-- 右侧主体 -->
     <main class="main">
@@ -220,15 +211,6 @@
             <span class="sep">/</span>
             手机产品
         </div>
-
-        <!-- Tab -->
-        <div class="tabs">
-            <a class="tab active" href="#">手机产品</a>
-            <a class="tab" href="{{ url('/reports/daily') }}">机型筛选</a>
-        </div>
-
-        <!-- 页面标题 -->
-        <div class="page-title">产品中心</div>
 
         <div class="tab-content">
 

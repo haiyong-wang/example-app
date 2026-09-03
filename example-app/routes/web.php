@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PhoneReportController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ToolsController;
+use App\Http\Controllers\GamesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,3 +41,33 @@ Route::get('/reports/daily/data', [PhoneReportController::class, 'dailyData']);
 
 // 产品中心(默认手机产品)
 Route::get('/products', [ProductController::class, 'index']);
+
+/*
+|--------------------------------------------------------------------------
+| 实用工具
+|--------------------------------------------------------------------------
+*/
+
+// 实用工具导航首页
+Route::get('/tools', [ToolsController::class, 'index']);
+
+// 二维码生成
+Route::get('/tools/qrcode', [ToolsController::class, 'qrcode']);
+
+/*
+|--------------------------------------------------------------------------
+| 摸鱼游戏
+|--------------------------------------------------------------------------
+*/
+
+// 敲木鱼
+Route::get('/games/woodfish', [GamesController::class, 'woodfish']);
+
+// 打地鼠
+Route::get('/games/whack', [GamesController::class, 'whack']);
+
+// 错位时钟
+Route::get('/games/clock', [GamesController::class, 'clock']);
+
+// 光影迷阵
+Route::get('/games/prism', [GamesController::class, 'prism']);

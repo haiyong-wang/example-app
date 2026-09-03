@@ -225,33 +225,17 @@
 <body>
 <div class="layout">
 
-    <!-- 左侧菜单 -->
-    <aside class="sidebar">
-        <div class="sidebar-logo">⚡ 焦皮的大项目</div>
-        <div class="menu">
-            <a class="menu-item" href="{{ url('/') }}">🏠 首页</a>
-            <a class="menu-item active" href="{{ url('/reports/daily') }}">📊 机型筛选</a>
-        </div>
-    </aside>
+    @include('layouts.sidebar', ['activeMenu' => 'daily'])
 
     <!-- 右侧主体 -->
     <main class="main">
 
         <!-- 顶部面包屑 -->
         <div class="topbar">
-            套餐
+            数据中心
             <span class="sep">/</span>
             机型筛选
         </div>
-
-        <!-- Tab -->
-        <div class="tabs">
-            <a class="tab" href="#">套餐</a>
-            <a class="tab active" href="#">机型筛选</a>
-        </div>
-
-        <!-- 页面标题 -->
-        <div class="page-title">对比日报</div>
 
         <div class="tab-content">
 
