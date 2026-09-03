@@ -39,6 +39,7 @@
         .card-title { padding: 14px 20px; border-bottom: 1px solid #ebeef5; font-weight: 500; font-size: 14px; color: #303133; position: relative; padding-left: 28px; }
         .card-title::before { content: ""; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 4px; height: 14px; background: #e89b26; border-radius: 2px; }
         .card-body { padding: 20px; }
+        #topicListBody { transition: opacity .2s ease; }
 
         /* ===== 筛选条 ===== */
         .filter-bar {
@@ -306,12 +307,169 @@
         }
         .btn-sm:hover { color: #e89b26; border-color: #e89b26; }
 
-        /* 分页 */
-        .pagination { display: flex; justify-content: center; gap: 6px; padding: 16px 0; flex-wrap: wrap; }
-        .pagination a, .pagination span { padding: 6px 11px; border-radius: 4px; border: 1px solid #ebeef5; color: #606266; font-size: 13px; }
-        .pagination a:hover { border-color: #e89b26; color: #e89b26; }
-        .pagination .active { background: #e89b26; color: #fff; border-color: #e89b26; }
-        .pagination .disabled { color: #c0c4cc; }
+        /* 分页组件（独立引用） */
+        .pagination-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 22px;
+            padding: 14px 18px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+            color: #606266;
+            font-size: 13px;
+            background: #fafbfc;
+            border: 1px solid #f0f2f5;
+            border-radius: 8px;
+        }
+        .pagination-wrap .pg-left,
+        .pagination-wrap .pg-mid,
+        .pagination-wrap .pg-right {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .pagination-wrap .pg-right {
+            color: #909399;
+        }
+        .pagination-wrap .pg-right .total-num {
+            color: #e89b26;
+            font-weight: 600;
+            margin: 0 2px;
+        }
+
+        /* 翻页按钮（上下页 / 数字页码） */
+        .pagination-wrap .page-btn,
+        .pagination-wrap .page-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            padding: 0 10px;
+            border: 1px solid #e4e7ed;
+            border-radius: 6px;
+            background: #fff;
+            color: #606266;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all .15s ease;
+            user-select: none;
+        }
+        .pagination-wrap .page-btn:hover,
+        .pagination-wrap .page-num:hover {
+            color: #e89b26;
+            border-color: #f2b84b;
+            background: #fff8eb;
+        }
+        .pagination-wrap .page-btn.disabled,
+        .pagination-wrap .page-btn.disabled:hover {
+            color: #c0c4cc;
+            background: #f5f7fa;
+            border-color: #ebeef5;
+            cursor: not-allowed;
+        }
+        .pagination-wrap .page-num.active {
+            color: #fff;
+            background: linear-gradient(135deg, #f2b84b, #e89b26);
+            border-color: #e89b26;
+            border-radius: 999px;
+            padding: 0 14px;
+            min-width: 36px;
+            cursor: default;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(232, 155, 38, .25);
+        }
+        .pagination-wrap .page-num.active:hover {
+            color: #fff;
+            background: linear-gradient(135deg, #f2b84b, #e89b26);
+            border-color: #e89b26;
+        }
+        .pagination-wrap .ellipsis {
+            color: #c0c4cc;
+            padding: 0 2px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* 文字标签 */
+        .pagination-wrap .page-text {
+            color: #909399;
+        }
+        .pagination-wrap .page-text em {
+            font-style: normal;
+            color: #e89b26;
+            font-weight: 600;
+        }
+
+        /* 每页条数下拉 */
+        .pagination-wrap .per-page-select {
+            height: 32px;
+            border: 1px solid #e4e7ed;
+            border-radius: 6px;
+            background: #fff;
+            padding: 0 28px 0 10px;
+            font-size: 13px;
+            color: #606266;
+            outline: none;
+            cursor: pointer;
+            transition: border-color .15s;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23909399' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 9px center;
+        }
+        .pagination-wrap .per-page-select:hover,
+        .pagination-wrap .per-page-select:focus {
+            border-color: #e89b26;
+            color: #303133;
+        }
+
+        /* 跳转输入框 + 按钮 */
+        .pagination-wrap .page-jump-input {
+            width: 56px;
+            height: 32px;
+            border: 1px solid #e4e7ed;
+            border-radius: 6px;
+            padding: 0 6px;
+            font-size: 13px;
+            color: #303133;
+            outline: none;
+            text-align: center;
+            transition: border-color .15s;
+            background: #fff;
+            -moz-appearance: textfield;
+        }
+        .pagination-wrap .page-jump-input::-webkit-outer-spin-button,
+        .pagination-wrap .page-jump-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .pagination-wrap .page-jump-input:focus {
+            border-color: #e89b26;
+            box-shadow: 0 0 0 2px rgba(232, 155, 38, .15);
+        }
+        .pagination-wrap .page-jump-btn {
+            height: 32px;
+            padding: 0 14px;
+            border: 1px solid #e89b26;
+            background: linear-gradient(135deg, #f2b84b, #e89b26);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity .15s, transform .1s;
+        }
+        .pagination-wrap .page-jump-btn:hover {
+            opacity: .92;
+        }
+        .pagination-wrap .page-jump-btn:active {
+            transform: translateY(1px);
+        }
 
         .empty {
             text-align: center;
@@ -390,7 +548,7 @@
             <div class="new-topic-bar">
                 <div class="bar-left">
                     <span class="bar-title">🐟 发起一个新的摸鱼话题</span>
-                    <span class="bar-sub">当前共有 <span class="num">{{ $topics->total() }}</span> 个话题，点击右侧按钮即可创建（同一天可创建多个）</span>
+                    <span class="bar-sub">当前共有 <span class="num" id="topicTotalInBar">{{ $topics->total() }}</span> 个话题，点击右侧按钮即可创建（同一天可创建多个）</span>
                 </div>
                 <a class="btn-new" href="{{ route('slack-topics.create') }}">＋ 创建话题</a>
             </div>
@@ -417,106 +575,15 @@
 
             <!-- 话题列表表格 -->
             <div class="card table-card">
-                <div class="card-title">全部话题（{{ $topics->total() }} 个）</div>
+                <div class="card-title">全部话题（<span id="topicTotalInTitle">{{ $topics->total() }}</span> 个）</div>
 
-                @if ($topics->isEmpty())
-                    <div class="empty">
-                        还没有符合条件的话题，
-                    </div>
-                @else
-                    <!-- 表格工具条 -->
-                    <div class="table-toolbar">
-                        <div class="toolbar-left">
-                            <button type="button" class="btn-batch">· 批量操作 ▾</button>
-                        </div>
-                        <div class="toolbar-right">
-                            共 <span class="total-num">{{ $topics->total() }}</span> 个话题，
-                            当前第 {{ $topics->currentPage() }} / {{ $topics->lastPage() }} 页
-                        </div>
-                    </div>
-
-                    <div class="card-body" style="padding: 0;">
-                        <form method="POST" action="#" id="batchForm">
-                            @csrf
-                            <table class="topic-table">
-                                <thead>
-                                    <tr>
-                                        <th class="col-checkbox">
-                                            <input type="checkbox" id="checkAll">
-                                        </th>
-                                        <th class="col-date">话题日期</th>
-                                        <th>话题（标题 / 描述 / 最后发言）</th>
-                                        <th class="col-people">发起人</th>
-                                        <th class="col-num">意见条数</th>
-                                        <th class="col-num">参与人数</th>
-                                        <th class="col-time">最后讨论</th>
-                                        <th class="col-action">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($topics as $topic)
-                                        @php
-                                            $week = ['周日','周一','周二','周三','周四','周五','周六'][(int) $topic->topic_date->dayOfWeek];
-                                            $authorName = $topic->user ? $topic->user->name : '已注销';
-                                            $authorFirst = $topic->user ? mb_substr($topic->user->name, 0, 1) : '？';
-                                        @endphp
-                                        <tr>
-                                            <td class="col-checkbox">
-                                                <input type="checkbox" name="ids[]" value="{{ $topic->id }}">
-                                            </td>
-                                            <td class="cell-date col-date">
-                                                <div class="d">{{ $topic->topic_date->format('d') }}</div>
-                                                <div class="w">{{ $week }}</div>
-                                                <div class="y">{{ $topic->topic_date->format('Y-m') }}</div>
-                                            </td>
-                                            <td class="cell-topic">
-                                                <div class="t">
-                                                    <a href="{{ route('slack-topics.show', $topic) }}">{{ $topic->title }}</a>
-                                                    @if ($topic->topic_date->isToday())
-                                                        <span class="today-badge">今日话题</span>
-                                                    @endif
-                                                </div>
-                                                @if ($topic->description)
-                                                    <div class="desc">{{ $topic->description }}</div>
-                                                @endif
-                                            </td>
-                                            <td class="cell-author col-people">
-                                                <span class="author-tag">
-                                                    <span class="avatar">{{ $authorFirst }}</span>
-                                                    {{ $authorName }}
-                                                </span>
-                                                <div class="sub">话题 #{{ $topic->id }}</div>
-                                            </td>
-                                            <td class="cell-num col-num">
-                                                <div class="v">{{ $topic->comments_count }}</div>
-                                                <div class="k">条意见</div>
-                                            </td>
-                                            <td class="cell-num col-num">
-                                                <div class="v">{{ $topic->participants_count }}</div>
-                                                <div class="k">人参与</div>
-                                            </td>
-                                            <td class="cell-time col-time">
-                                                @if ($topic->last_comment_at)
-                                                    <div class="l">{{ $topic->last_comment_at->format('Y-m-d H:i') }}</div>
-                                                    <div class="s">{{ $topic->last_comment_at->diffForHumans() }}</div>
-                                                @else
-                                                    <div class="l">—</div>
-                                                    <div class="s">尚未讨论</div>
-                                                @endif
-                                            </td>
-                                            <td class="cell-action col-action">
-                                                <a class="btn-sm" href="{{ route('slack-topics.show', $topic) }}">查看讨论</a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </form>
-                        <div class="pagination">
-                            {{ $topics->withQueryString()->links() }}
-                        </div>
-                    </div>
-                @endif
+                <!-- 该容器内容会随异步分页而局部刷新 -->
+                <div id="topicListBody">
+                    @include('slack-topics._table', [
+                        'topics'  => $topics,
+                        'filters' => $filters,
+                    ])
+                </div>
             </div>
 
         </div>
@@ -525,17 +592,160 @@
 
 <script>
     (function () {
-        // 全选 / 反选
-        var checkAll = document.getElementById('checkAll');
-        if (checkAll) {
-            checkAll.addEventListener('change', function () {
-                var boxes = document.querySelectorAll('.topic-table tbody input[type="checkbox"]');
-                Array.prototype.forEach.call(boxes, function (b) {
-                    b.checked = checkAll.checked;
+        var bodyEl = document.getElementById('topicListBody');
+
+        // 给当前页内的全选框绑定事件（每次刷新后重新绑定）
+        function bindCheckAll() {
+            var checkAll = document.getElementById('checkAll');
+            if (checkAll && !checkAll.dataset.bound) {
+                checkAll.dataset.bound = '1';
+                checkAll.addEventListener('change', function () {
+                    var boxes = document.querySelectorAll('.topic-table tbody input[type="checkbox"]');
+                    Array.prototype.forEach.call(boxes, function (b) {
+                        b.checked = checkAll.checked;
+                    });
                 });
+            }
+        }
+
+        // 更新页面顶部两处"话题总数"显示
+        function updateTotals(total) {
+            var elBar = document.getElementById('topicTotalInBar');
+            var elTitle = document.getElementById('topicTotalInTitle');
+            if (elBar) elBar.textContent = total;
+            if (elTitle) elTitle.textContent = total;
+        }
+
+        // 异步拉取某一页（url 为带完整查询参数的列表地址），成功后局部替换列表区
+        function loadPage(url) {
+            if (!url) return;
+            bodyEl.style.opacity = '.5';
+            fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.text();
+                })
+                .then(function (html) {
+                    bodyEl.innerHTML = html;
+
+                    // 用返回的 data-topic-total 同步刷新顶部总数
+                    var totalSpan = bodyEl.querySelector('[data-topic-total]');
+                    if (totalSpan) {
+                        updateTotals(totalSpan.getAttribute('data-topic-total'));
+                    }
+
+                    // 用 replaceState 更新地址栏（不刷新页面），便于收藏/后退
+                    if (window.history && window.history.replaceState) {
+                        window.history.replaceState(null, '', url);
+                    }
+
+                    bindCheckAll();
+                })
+                .catch(function () {
+                    // 请求失败时退化为整页跳转，保证仍能正常浏览
+                    window.location.href = url;
+                })
+                .finally(function () {
+                    if (bodyEl) bodyEl.style.opacity = '1';
+                });
+        }
+
+        // 构造目标页 URL：保留当前所有 query，但重置或覆盖指定参数
+        function buildUrl(overrides) {
+            var u;
+            try {
+                u = new URL(window.location.href);
+            } catch (e) {
+                // 极老浏览器退化为手动拼接
+                var params = [];
+                var search = window.location.search.replace(/^\?/, '');
+                if (search) {
+                    search.split('&').forEach(function (kv) {
+                        var parts = kv.split('=');
+                        var k = decodeURIComponent(parts[0] || '');
+                        var v = decodeURIComponent(parts[1] || '');
+                        if (k) params.push([k, v]);
+                    });
+                }
+                Object.keys(overrides).forEach(function (k) {
+                    var v = overrides[k];
+                    if (v === null || v === undefined || v === '') {
+                        params = params.filter(function (kv) { return kv[0] !== k; });
+                    } else {
+                        params = params.filter(function (kv) { return kv[0] !== k; });
+                        params.push([k, v]);
+                    }
+                });
+                var qs = params.map(function (kv) { return encodeURIComponent(kv[0]) + '=' + encodeURIComponent(kv[1]); }).join('&');
+                return window.location.pathname + (qs ? '?' + qs : '');
+            }
+            Object.keys(overrides).forEach(function (k) {
+                var v = overrides[k];
+                if (v === null || v === undefined || v === '') {
+                    u.searchParams.delete(k);
+                } else {
+                    u.searchParams.set(k, v);
+                }
+            });
+            return u.toString();
+        }
+
+        // 事件委托：点击分页链接时不整页跳转，而是走异步加载
+        function bindPagination() {
+            // 翻页（a 链接）点击
+            document.addEventListener('click', function (e) {
+                var link = e.target.closest ? e.target.closest('[data-ajax-pagination] a') : null;
+                if (!link) return;
+                var href = link.getAttribute('href');
+                if (!href) return;
+                e.preventDefault();
+                loadPage(href);
+            });
+
+            // 跳转到指定页（按钮 / 输入框回车）
+            document.addEventListener('click', function (e) {
+                var btn = e.target.closest ? e.target.closest('[data-ajax-pagination] .page-jump-btn') : null;
+                if (!btn) return;
+                var wrap = btn.closest('[data-ajax-pagination]');
+                if (!wrap) return;
+                var input = wrap.querySelector('.page-jump-input');
+                var lastPage = parseInt(wrap.getAttribute('data-last-page') || '1', 10);
+                var page = parseInt(input.value, 10);
+                if (!page || page < 1) page = 1;
+                if (page > lastPage) page = lastPage;
+                var url = buildUrl({ page: page });
+                loadPage(url);
+            });
+
+            // 输入框回车
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter' && e.keyCode !== 13) return;
+                var input = e.target.closest ? e.target.closest('[data-ajax-pagination] .page-jump-input') : null;
+                if (!input) return;
+                e.preventDefault();
+                var wrap = input.closest('[data-ajax-pagination]');
+                if (!wrap) return;
+                var lastPage = parseInt(wrap.getAttribute('data-last-page') || '1', 10);
+                var page = parseInt(input.value, 10);
+                if (!page || page < 1) page = 1;
+                if (page > lastPage) page = lastPage;
+                var url = buildUrl({ page: page });
+                loadPage(url);
+            });
+
+            // 每页条数切换
+            document.addEventListener('change', function (e) {
+                var sel = e.target.closest ? e.target.closest('[data-ajax-pagination] .per-page-select') : null;
+                if (!sel) return;
+                var url = buildUrl({ page: 1, per_page: sel.value });
+                loadPage(url);
             });
         }
 
+        bindPagination();
+        bindCheckAll();
     })();
 </script>
 </body>

@@ -65,7 +65,14 @@ class SlackTopicController extends Controller
             });
         }
 
-        $topics = $query->paginate(15)->withQueryString();
+        // 每页条数：仅接受白名单内的值，避免被任意数字影响性能
+        $allowedPerPage = [10, 15, 20, 50, 100];
+        $perPage = (int) $request->query('per_page', 15);
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 15;
+        }
+
+        $topics = $query->paginate($perPage)->withQueryString();
 
         // 对当前页话题一次性取出意见统计：参与人数 + 最后发言时间 + 意见数
         $topicIds = $topics->pluck('id')->all();
@@ -112,6 +119,14 @@ class SlackTopicController extends Controller
             $topic->participants_count= (int) $participants->get($topic->id, 0);
             $topic->last_comment_at   = $lastTimes->get($topic->id);
             $topic->last_content      = $lastContents->get($topic->id);
+        }
+
+        // 异步分页请求（点击页码）：仅返回列表表体片段，供前端局部刷新
+        if ($request->ajax()) {
+            return view('slack-topics._table', [
+                'topics'  => $topics,
+                'filters' => $filters,
+            ]);
         }
 
         return view('slack-topics.list', [
