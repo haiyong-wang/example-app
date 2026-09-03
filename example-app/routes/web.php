@@ -60,6 +60,9 @@ Route::get('/tools/qrcode', [ToolsController::class, 'qrcode']);
 |--------------------------------------------------------------------------
 */
 
+// 小游戏导航首页
+Route::get('/games', [GamesController::class, 'index']);
+
 // 敲木鱼
 Route::get('/games/woodfish', [GamesController::class, 'woodfish']);
 

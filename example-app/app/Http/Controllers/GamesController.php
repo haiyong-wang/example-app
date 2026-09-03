@@ -12,7 +12,7 @@ namespace App\Http\Controllers;
 class GamesController extends Controller
 {
     /**
-     * 游戏大厅首页
+     * 小游戏导航首页
      *
      * GET /games
      *
@@ -20,7 +20,49 @@ class GamesController extends Controller
      */
     public function index()
     {
-        return view('games.index');
+        // 小游戏清单（后续每新增一个游戏，在这里加一项即可自动出现在首页）
+        $games = [
+            [
+                'key'     => 'woodfish',
+                'name'    => '敲木鱼',
+                'desc'    => '电子木鱼，一键敲出功德，佛系摸鱼首选',
+                'emoji'   => '🪵',
+                'color'   => 'gold',
+                'url'     => '/games/woodfish',
+                'ready'   => true,
+            ],
+            [
+                'key'     => 'whack',
+                'name'    => '打地鼠',
+                'desc'    => '疯狂点击冒头地鼠，释放工作压力',
+                'emoji'   => '🐹',
+                'color'   => 'green',
+                'url'     => '/games/whack',
+                'ready'   => true,
+            ],
+            [
+                'key'     => 'clock',
+                'name'    => '错位时钟',
+                'desc'    => '把错位的三根指针全部校准回 12 点',
+                'emoji'   => '🕐',
+                'color'   => 'blue',
+                'url'     => '/games/clock',
+                'ready'   => true,
+            ],
+            [
+                'key'     => 'prism',
+                'name'    => '光影迷阵',
+                'desc'    => '用棱镜搭建光路，在激光迷阵中求生',
+                'emoji'   => '✨',
+                'color'   => 'purple',
+                'url'     => '/games/prism',
+                'ready'   => true,
+            ],
+        ];
+
+        return view('games.index', [
+            'games' => $games,
+        ]);
     }
 
     /**

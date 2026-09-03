@@ -81,16 +81,13 @@
             </div>
         </div>
 
-        <div class="menu-group @if($current === 'woodfish' || $current === 'whack' || $current === 'clock' || $current === 'prism') open @endif">
+        <div class="menu-group @if($current === 'games' || $current === 'woodfish' || $current === 'whack' || $current === 'clock' || $current === 'prism') open @endif">
             <div class="menu-item menu-group-title">
                 摸鱼游戏
                 <span class="caret">▸</span>
             </div>
             <div class="sub-menu">
-                <a class="sub-item @if($current === 'woodfish') active @endif" href="{{ url('/games/woodfish') }}">敲木鱼</a>
-                <a class="sub-item @if($current === 'whack') active @endif" href="{{ url('/games/whack') }}">打地鼠</a>
-                <a class="sub-item @if($current === 'clock') active @endif" href="{{ url('/games/clock') }}">错位时钟</a>
-                <a class="sub-item @if($current === 'prism') active @endif" href="{{ url('/games/prism') }}">光影迷阵</a>
+                <a class="sub-item @if($current === 'games') active @endif" href="{{ url('/games') }}">小游戏</a>
             </div>
         </div>
     </nav>
