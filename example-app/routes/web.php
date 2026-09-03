@@ -109,6 +109,9 @@ Route::middleware('auth')->group(function () {
     // 光影迷阵
     Route::get('/games/prism', [GamesController::class, 'prism']);
 
+    // 2048
+    Route::get('/games/2048', [GamesController::class, 'game2048']);
+
     /*
     |--------------------------------------------------------------------------
     | 摸鱼时长统计（自动记录在线时长）

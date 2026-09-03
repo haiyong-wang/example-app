@@ -162,7 +162,7 @@
             </div>
         </div>
 
-        <div class="menu-group @if($current === 'games' || $current === 'woodfish' || $current === 'whack' || $current === 'clock' || $current === 'prism') open @endif">
+        <div class="menu-group @if($current === 'games' || $current === 'woodfish' || $current === 'whack' || $current === 'clock' || $current === 'prism' || $current === '2048') open @endif">
             <div class="menu-item menu-group-title">
                 摸鱼游戏
                 <span class="caret">▸</span>

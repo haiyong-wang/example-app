@@ -58,6 +58,15 @@ class GamesController extends Controller
                 'url'     => '/games/prism',
                 'ready'   => true,
             ],
+            [
+                'key'     => '2048',
+                'name'    => '2048',
+                'desc'    => '滑动合并数字方块，冲击 2048 高分',
+                'emoji'   => '🧩',
+                'color'   => 'cyan',
+                'url'     => '/games/2048',
+                'ready'   => true,
+            ],
         ];
 
         return view('games.index', [
@@ -111,5 +120,17 @@ class GamesController extends Controller
     public function prism()
     {
         return view('games.prism');
+    }
+
+    /**
+     * 2048 小游戏
+     *
+     * GET /games/2048
+     *
+     * @return \Illuminate\View\View
+     */
+    public function game2048()
+    {
+        return view('games.game2048');
     }
 }
