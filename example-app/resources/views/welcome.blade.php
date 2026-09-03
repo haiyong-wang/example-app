@@ -1,9 +1,19 @@
+@php
+    $user = auth()->user();
+    // 简单换算：注册天数 => 等级（憨憨值）
+    $days = $user->created_at ? max(1, (int) $user->created_at->diffInDays(now()) + 1) : 1;
+    $level = min(99, (int) floor($days / 7) + 1);
+    $levelName = $level >= 20 ? '摸鱼宗师' : ($level >= 10 ? '摸鱼高手' : ($level >= 5 ? '资深摸鱼人' : '摸鱼新人'));
+    // 今日问候（强制按东八区计算，避免服务器 UTC 导致问候错乱）
+    $hour = (int) now()->setTimezone('Asia/Shanghai')->format('G');
+    $greet = $hour < 6 ? '夜深了还不睡' : ($hour < 9 ? '早安' : ($hour < 12 ? '上午好' : ($hour < 14 ? '中午好' : ($hour < 18 ? '下午好' : '晚上好'))));
+@endphp
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name', '首页') }} - 首页</title>
+    <title>首页 - {{ config('app.name', '憨憨专属摸鱼网站') }}</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -18,193 +28,99 @@
         .layout { display: flex; min-height: 100vh; }
 
         /* 左侧菜单 */
-        .sidebar {
-            width: 200px;
-            background: #fff;
-            border-right: 1px solid #ebeef5;
-            flex-shrink: 0;
-        }
-        .sidebar-logo {
-            padding: 18px 20px;
-            border-bottom: 1px solid #ebeef5;
-            font-weight: bold;
-            font-size: 16px;
-            color: #303133;
-        }
+        .sidebar { width: 200px; background: #fff; border-right: 1px solid #ebeef5; flex-shrink: 0; }
+        .sidebar-logo { padding: 18px 20px; border-bottom: 1px solid #ebeef5; font-weight: bold; font-size: 15px; color: #303133; }
         .menu { padding: 8px 0; }
-        .menu-item {
-            display: block;
-            padding: 12px 20px;
-            color: #303133;
-            cursor: pointer;
-            border-left: 3px solid transparent;
-        }
+        .menu-item { display: block; padding: 12px 20px; color: #303133; cursor: pointer; border-left: 3px solid transparent; }
         .menu-item:hover { background: #f5f7fa; }
-        .menu-item.active {
-            background: #ecf5ff;
-            color: #409eff;
-            border-left-color: #409eff;
-        }
-        .menu-section {
-            padding: 10px 20px 6px;
-            color: #909399;
-            font-size: 12px;
-        }
+        .menu-item.active { background: #ecf5ff; color: #409eff; border-left-color: #409eff; }
+        .menu-section { padding: 10px 20px 6px; color: #909399; font-size: 12px; }
 
         /* 右侧主体 */
         .main { flex: 1; min-width: 0; }
 
         /* 顶部 */
-        .topbar {
-            background: #fff;
-            padding: 10px 20px;
-            border-bottom: 1px solid #ebeef5;
-            font-size: 13px;
-            color: #606266;
-        }
+        .topbar { background: #fff; padding: 10px 20px; border-bottom: 1px solid #ebeef5; font-size: 13px; color: #606266; }
         .topbar .sep { color: #c0c4cc; margin: 0 6px; }
 
         /* Tab */
-        .tabs {
-            background: #fff;
-            padding: 0 20px;
-            border-bottom: 1px solid #ebeef5;
-            display: flex;
-        }
-        .tab {
-            padding: 14px 16px;
-            margin-right: 4px;
-            color: #606266;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-        }
-        .tab.active {
-            color: #409eff;
-            border-bottom-color: #409eff;
-        }
+        .tabs { background: #fff; padding: 0 20px; border-bottom: 1px solid #ebeef5; display: flex; }
+        .tab { padding: 14px 16px; margin-right: 4px; color: #606266; cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab.active { color: #409eff; border-bottom-color: #409eff; }
         .tab-content { padding: 20px; }
 
-        /* 页面标题 */
-        .page-title {
-            background: #fff;
-            padding: 16px 20px;
-            font-weight: 500;
-            font-size: 15px;
-            border-bottom: 1px solid #ebeef5;
-        }
-
         /* 卡片 */
-        .card {
-            background: #fff;
-            border-radius: 4px;
-            margin-bottom: 16px;
-        }
-        .card-title {
-            padding: 14px 20px;
-            border-bottom: 1px solid #ebeef5;
-            font-weight: 500;
-            font-size: 14px;
-            color: #303133;
-            position: relative;
-            padding-left: 28px;
-        }
-        .card-title::before {
-            content: "";
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 14px;
-            background: #409eff;
-            border-radius: 2px;
-        }
+        .card { background: #fff; border-radius: 8px; margin-bottom: 16px; }
+        .card-title { padding: 14px 20px; border-bottom: 1px solid #ebeef5; font-weight: 500; font-size: 14px; color: #303133; position: relative; padding-left: 28px; }
+        .card-title::before { content: ""; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 4px; height: 14px; background: #e89b26; border-radius: 2px; }
         .card-body { padding: 20px; }
-        .card-tip {
-            font-size: 12px;
-            color: #909399;
-            margin-left: 10px;
-        }
 
-        /* 欢迎横幅 */
+        /* 欢迎横幅（摸鱼黄） */
         .hero {
-            background: linear-gradient(135deg, #409eff 0%, #79bbff 100%);
-            border-radius: 4px;
-            padding: 40px 32px;
+            background: linear-gradient(135deg, #f2b84b 0%, #e89b26 60%, #d9822b 100%);
+            border-radius: 10px;
+            padding: 30px 28px;
             margin-bottom: 16px;
             color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            flex-wrap: wrap;
         }
-        .hero h1 { font-size: 24px; font-weight: 600; margin-bottom: 12px; }
-        .hero p { font-size: 14px; opacity: 0.92; line-height: 1.8; max-width: 680px; }
-        .hero-btn {
-            display: inline-block;
-            margin-top: 24px;
-            padding: 10px 28px;
-            background: #fff;
-            color: #409eff;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 3px;
-            transition: all .2s;
-        }
-        .hero-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.12); }
-
-        /* 功能入口网格 */
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
-        .feature-card {
-            background: #fff;
-            border-radius: 4px;
-            padding: 24px 20px;
-            border: 1px solid #ebeef5;
-            transition: all .2s;
-            cursor: pointer;
-        }
-        .feature-card:hover {
-            border-color: #409eff;
-            box-shadow: 0 4px 12px rgba(64, 158, 255, .12);
-            transform: translateY(-2px);
-        }
-        .feature-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 6px;
+        .hero .big-avatar {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.22);
+            border: 3px solid rgba(255,255,255,.55);
+            color: #fff;
+            font-size: 34px;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            margin-bottom: 14px;
-            background: #ecf5ff;
-            color: #409eff;
+            flex-shrink: 0;
         }
-        .feature-name { font-size: 15px; font-weight: 500; color: #303133; margin-bottom: 6px; }
-        .feature-desc { font-size: 13px; color: #909399; line-height: 1.7; }
+        .hero-text { flex: 1; min-width: 240px; }
+        .hero-text h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+        .hero-text .signature { font-size: 14px; opacity: .95; line-height: 1.7; font-style: italic; }
+        .hero-text .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 10px;
+            background: rgba(255,255,255,.22);
+            border-radius: 14px;
+            padding: 4px 12px;
+            font-size: 12px;
+        }
 
-        /* 快捷入口说明 */
-        .info-list { list-style: none; }
-        .info-list li {
-            position: relative;
-            padding: 10px 0 10px 22px;
-            border-bottom: 1px dashed #ebeef5;
-            color: #606266;
-            line-height: 1.7;
+        /* 个人资料信息 */
+        .profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+        .profile-item { background: #fafbfc; border: 1px solid #ebeef5; border-radius: 8px; padding: 14px 16px; }
+        .profile-item .k { font-size: 12px; color: #909399; margin-bottom: 6px; }
+        .profile-item .v { font-size: 14px; color: #303133; font-weight: 500; word-break: break-all; }
+
+        /* 功能入口网格 */
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+        .feature-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 22px 20px;
+            border: 1px solid #ebeef5;
+            transition: all .2s;
+            cursor: pointer;
+            display: block;
         }
-        .info-list li:last-child { border-bottom: none; }
-        .info-list li::before {
-            content: "";
-            position: absolute;
-            left: 4px;
-            top: 17px;
-            width: 6px;
-            height: 6px;
-            background: #409eff;
-            border-radius: 50%;
+        .feature-card:hover { border-color: #e89b26; box-shadow: 0 6px 18px rgba(232, 155, 38, .15); transform: translateY(-2px); }
+        .feature-icon {
+            width: 44px; height: 44px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; margin-bottom: 14px;
+            background: #fdf6ec; color: #e89b26;
         }
-        .info-list li a { color: #409eff; }
-        .info-list li a:hover { text-decoration: underline; }
+        .feature-name { font-size: 15px; font-weight: 600; color: #303133; margin-bottom: 6px; }
+        .feature-desc { font-size: 13px; color: #909399; line-height: 1.7; }
 
         @media (max-width: 900px) {
             .layout { flex-direction: column; }
@@ -225,53 +141,74 @@
         <div class="topbar">
             首页
             <span class="sep">/</span>
-            首页概览
+            我的摸鱼面板
         </div>
 
         <div class="tab-content">
 
-            <!-- 欢迎横幅 -->
+            <!-- 欢迎横幅（带用户头像） -->
             <div class="hero">
-                <h1>欢迎使用 焦皮的大项目</h1>
-                <p>
-                    这是一个统一管理平台，集中提供机型数据查询、统计与分析能力。
-                    通过下面的功能入口，您可以快速进入对应模块，查看实时数据与日报报表。
-                </p>
-                <a class="hero-btn" href="{{ url('/reports/daily') }}">前往机型筛选 →</a>
+                <div class="big-avatar">{{ mb_substr($user->name, 0, 1) }}</div>
+                <div class="hero-text">
+                    <h1>{{ $greet }}，{{ $user->name }} 憨憨 🐟</h1>
+                    <div class="signature">“{{ $user->signature ?? '今天也是快乐摸鱼的一天~' }}”</div>
+                    <span class="badge">🏅 {{ $levelName }} · Lv.{{ $level }}</span>
+                </div>
             </div>
 
-            <!-- 功能入口 -->
+            <!-- 我的信息 -->
             <div class="card">
-                <div class="card-title">
-                    功能入口
-                    <span class="card-tip">点击卡片即可进入对应模块</span>
-                </div>
+                <div class="card-title">我的信息</div>
                 <div class="card-body">
-                    <div class="feature-grid">
-                        <a class="feature-card" href="{{ url('/reports/daily') }}">
-                            <div class="feature-icon">📱</div>
-                            <div class="feature-name">机型筛选</div>
-                            <div class="feature-desc">按日期查看每日查询数、命中数、命中比例等统计报表。</div>
-                        </a>
-                        <a class="feature-card" href="{{ url('/reports/daily') }}">
-                            <div class="feature-icon">📊</div>
-                            <div class="feature-name">日报统计</div>
-                            <div class="feature-desc">查看当日实时数据与历史日报明细，支持日期区间筛选。</div>
-                        </a>
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <div class="k">昵称</div>
+                            <div class="v">{{ $user->name }}</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="k">邮箱</div>
+                            <div class="v">{{ $user->email }}</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="k">注册时间</div>
+                            <div class="v">{{ $user->created_at ? $user->created_at->format('Y-m-d') : '-' }}</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="k">最近登录</div>
+                            <div class="v">{{ $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i') : '刚刚' }}</div>
+                        </div>
+                        <div class="profile-item">
+                            <div class="k">摸鱼宣言</div>
+                            <div class="v">{{ $user->signature ?? '还没有宣言' }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 平台说明 -->
+            <!-- 摸鱼快捷入口 -->
             <div class="card">
-                <div class="card-title">平台说明</div>
+                <div class="card-title">
+                    摸鱼快捷入口
+                    <span style="font-size:12px;color:#c0c4cc;margin-left:10px;font-weight:400">点击卡片快乐开摸</span>
+                </div>
                 <div class="card-body">
-                    <ul class="info-list">
-                        <li>本平台用于展示手机型号查询相关的数据报表。</li>
-                        <li>日报页面支持按日期区间筛选，以及每页条数调整。</li>
-                        <li>命中比例 = 命中数 ÷ 查询数 × 100%，用于衡量匹配效率。</li>
-                        <li>如需查看详细报表，请前往 <a href="{{ url('/reports/daily') }}">机型筛选</a> 页面。</li>
-                    </ul>
+                    <div class="feature-grid">
+                        <a class="feature-card" href="{{ url('/games') }}">
+                            <div class="feature-icon">🎮</div>
+                            <div class="feature-name">摸鱼小游戏</div>
+                            <div class="feature-desc">敲木鱼、打地鼠……总有一款适合开小差。</div>
+                        </a>
+                        <a class="feature-card" href="{{ url('/tools') }}">
+                            <div class="feature-icon">🔧</div>
+                            <div class="feature-name">实用小工具</div>
+                            <div class="feature-desc">二维码、PDF 转换等摸鱼间隙救急好帮手。</div>
+                        </a>
+{{--                        <a class="feature-card" href="{{ url('/reports/daily') }}">--}}
+{{--                            <div class="feature-icon">📊</div>--}}
+{{--                            <div class="feature-name">机型数据日报</div>--}}
+{{--                            <div class="feature-desc">顺带瞄一眼的报表数据，显得很忙的样子。</div>--}}
+{{--                        </a>--}}
+                    </div>
                 </div>
             </div>
 

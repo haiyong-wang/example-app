@@ -54,22 +54,92 @@
         color: #409eff;
         font-weight: 500;
     }
+
+    /* 让侧边栏内容区可滚动、底部用户区固定 */
+    .sidebar { display: flex; flex-direction: column; }
+    #app-menu { flex: 1; overflow-y: auto; }
+
+    /* 底部用户区 */
+    .sidebar-user {
+        padding: 12px;
+        border-top: 1px solid #ebeef5;
+        background: #fafbfc;
+    }
+    .user-chip {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        padding: 6px 4px;
+    }
+    .user-chip .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f2b84b, #e89b26);
+        color: #fff;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .user-chip .user-meta { display: flex; flex-direction: column; min-width: 0; }
+    .user-chip .user-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #303133;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .user-chip .user-sub { font-size: 11px; color: #909399; margin-top: 2px; }
+    .logout-form { margin-top: 8px; }
+    .logout-btn {
+        display: block;
+        width: 100%;
+        padding: 7px 0;
+        text-align: center;
+        border: 1px solid #ebeef5;
+        border-radius: 4px;
+        background: #fff;
+        color: #606266;
+        font-size: 13px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all .2s;
+    }
+    .logout-btn:hover { border-color: #f56c6c; color: #f56c6c; }
+    .logout-btn.link { display: inline-block; width: 48%; }
+    .logout-btn.link.primary { background: #409eff; border-color: #409eff; color: #fff; }
+    .logout-btn.link.primary:hover { background: #66b1ff; border-color: #66b1ff; color: #fff; }
+    .guest-box .guest-tip {
+        font-size: 12px;
+        color: #909399;
+        text-align: center;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+    }
 </style>
 
 <aside class="sidebar">
-    <div class="sidebar-logo">⚡ 焦皮的大项目</div>
+    <div class="sidebar-logo">🐟 憨憨专属摸鱼网站</div>
     <nav class="menu" id="app-menu">
         <a class="menu-item @if($current === 'home') active @endif" href="{{ url('/') }}">首页</a>
 
-        <div class="menu-group @if($current === 'daily') open @endif">
-            <div class="menu-item menu-group-title">
-                数据中心
-                <span class="caret">▸</span>
-            </div>
-            <div class="sub-menu">
-                <a class="sub-item @if($current === 'daily') active @endif" href="{{ url('/reports/daily') }}">机型筛选日报</a>
-            </div>
-        </div>
+        <a class="menu-item @if($current === 'slack') active @endif" href="{{ url('/slack') }}">摸鱼时长</a>
+
+{{--        <div class="menu-group @if($current === 'daily') open @endif">--}}
+{{--            <div class="menu-item menu-group-title">--}}
+{{--                数据中心--}}
+{{--                <span class="caret">▸</span>--}}
+{{--            </div>--}}
+{{--            <div class="sub-menu">--}}
+{{--                <a class="sub-item @if($current === 'daily') active @endif" href="{{ url('/reports/daily') }}">机型筛选日报</a>--}}
+{{--            </div>--}}
+{{--        </div>--}}
 
         <div class="menu-group @if($current === 'tools' || $current === 'qrcode') open @endif">
             <div class="menu-item menu-group-title">
@@ -91,6 +161,29 @@
             </div>
         </div>
     </nav>
+
+    <!-- 底部用户区 -->
+    <div class="sidebar-user">
+        @auth
+            <a class="user-chip" href="{{ url('/') }}">
+                <span class="avatar">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
+                <span class="user-meta">
+                    <span class="user-name">{{ auth()->user()->name }}</span>
+                    <span class="user-sub">憨憨日常摸鱼中</span>
+                </span>
+            </a>
+            <form method="POST" action="{{ url('/logout') }}" class="logout-form">
+                @csrf
+                <button type="submit" class="logout-btn">退出登录</button>
+            </form>
+        @else
+            <div class="guest-box">
+                <p class="guest-tip">登录后即可继续快乐摸鱼</p>
+                <a class="logout-btn link" href="{{ url('/login') }}">登录</a>
+                <a class="logout-btn link primary" href="{{ url('/register') }}">注册</a>
+            </div>
+        @endauth
+    </div>
 </aside>
 
 <script>
