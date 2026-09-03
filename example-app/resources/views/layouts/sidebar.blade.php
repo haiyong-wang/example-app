@@ -129,7 +129,7 @@
     <nav class="menu" id="app-menu">
         <a class="menu-item @if($current === 'home') active @endif" href="{{ url('/') }}">首页</a>
 
-        <a class="menu-item @if($current === 'slack') active @endif" href="{{ url('/slack') }}">摸鱼时长</a>
+{{--        <a class="menu-item @if($current === 'slack') active @endif" href="{{ url('/slack') }}">摸鱼时长</a>--}}
 
         <div class="menu-group @if(in_array($current, ['slack-topics-new', 'slack-topics-list', 'slack-topic-show'])) open @endif">
             <div class="menu-item menu-group-title">
@@ -152,13 +152,13 @@
 {{--            </div>--}}
 {{--        </div>--}}
 
-        <div class="menu-group @if($current === 'tools' || $current === 'qrcode') open @endif">
+        <div class="menu-group @if($current === 'tools' || $current === 'qrcode' || $current === 'fortune') open @endif">
             <div class="menu-item menu-group-title">
                 实用工具
                 <span class="caret">▸</span>
             </div>
             <div class="sub-menu">
-                <a class="sub-item @if($current === 'tools' || $current === 'qrcode') active @endif" href="{{ url('/tools') }}">工具导航</a>
+                <a class="sub-item @if($current === 'tools') active @endif" href="{{ url('/tools') }}">工具导航</a>
             </div>
         </div>
 

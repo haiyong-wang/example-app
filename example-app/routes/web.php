@@ -85,6 +85,9 @@ Route::middleware('auth')->group(function () {
     // 二维码生成
     Route::get('/tools/qrcode', [ToolsController::class, 'qrcode']);
 
+    // 八字算命（GET 展示表单 / POST 提交测算）
+    Route::match(['get', 'post'], '/tools/fortune', [ToolsController::class, 'fortune']);
+
     /*
     |--------------------------------------------------------------------------
     | 摸鱼游戏

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八字算命 - 憨憨专属摸鱼网站</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #f5f6fa;
+            color: #2c3e50;
+            font-size: 14px;
+            min-height: 100vh;
+        }
+        a { text-decoration: none; color: inherit; }
+
+        .layout { display: flex; min-height: 100vh; }
+
+        /* 左侧菜单 */
+        .sidebar {
+            width: 200px;
+            background: #fff;
+            border-right: 1px solid #ebeef5;
+            flex-shrink: 0;
+        }
+        .sidebar-logo {
+            padding: 18px 20px;
+            border-bottom: 1px solid #ebeef5;
+            font-weight: bold;
+            font-size: 16px;
+            color: #303133;
+        }
+
+        /* 右侧主体 */
+        .main { flex: 1; min-width: 0; }
+
+        /* 顶部 */
+        .topbar {
+            background: #fff;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ebeef5;
+            font-size: 13px;
+            color: #606266;
+        }
+        .topbar .sep { color: #c0c4cc; margin: 0 6px; }
+
+        .tab-content { padding: 20px; }
+
+        /* 卡片 */
+        .card {
+            background: #fff;
+            border: 1px solid #ebeef5;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+        .card-title {
+            padding: 14px 20px;
+            border-bottom: 1px solid #ebeef5;
+            font-weight: 500;
+            font-size: 14px;
+            color: #303133;
+            position: relative;
+            padding-left: 28px;
+        }
+        .card-title::before {
+            content: "";
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 14px;
+            background: linear-gradient(180deg, #a262e6, #bb85ee);
+            border-radius: 2px;
+        }
+        .card-body { padding: 20px; }
+
+        /* 表单 */
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block; font-size: 13px; color: #606266; margin-bottom: 6px;
+        }
+        .form-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .form-row .field { flex: 1; min-width: 150px; }
+        .form-group select, .form-group input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            color: #303133;
+            background: #fff;
+            font-family: inherit;
+        }
+        .form-group select:focus, .form-group input[type="text"]:focus { border-color: #a262e6; }
+        .err-msg { color: #f56c6c; font-size: 12px; margin-top: 4px; }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 34px;
+            border: 1px solid #a262e6;
+            background: linear-gradient(135deg, #a262e6, #bb85ee);
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 14px rgba(162, 98, 230, .25);
+        }
+        .btn:hover { filter: brightness(1.05); box-shadow: 0 6px 18px rgba(162, 98, 230, .35); }
+        .btn-tip { font-size: 12px; color: #909399; margin-top: 10px; }
+
+        /* 测算结果 */
+        .f-banner {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 18px;
+            padding: 8px 2px 18px;
+            border-bottom: 1px dashed #ebeef5;
+            margin-bottom: 18px;
+        }
+        .f-banner .f-orb {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: linear-gradient(135deg, #a262e6, #d88dee);
+            color: #fff; font-size: 32px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 16px rgba(162, 98, 230, .35);
+            flex-shrink: 0;
+        }
+        .f-banner .f-main { min-width: 0; }
+        .f-banner .f-title { font-size: 18px; font-weight: 600; color: #303133; }
+        .f-banner .f-sub { font-size: 13px; color: #909399; margin-top: 6px; line-height: 1.7; }
+
+        .f-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+        .f-cell {
+            border: 1px solid #ebeef5;
+            border-radius: 6px;
+            padding: 16px;
+            background: #fafbfc;
+        }
+        .f-cell .f-cell-label { font-size: 12px; color: #909399; margin-bottom: 8px; }
+        .f-cell .f-cell-value { font-size: 18px; font-weight: 600; color: #303133; }
+        .f-cell .f-cell-tag {
+            display: inline-block; margin-top: 6px;
+            font-size: 11px; color: #a262e6;
+            background: rgba(162,98,230,.1);
+            border: 1px solid rgba(162,98,230,.25);
+            padding: 2px 8px; border-radius: 10px;
+        }
+
+        /* 运势明细 */
+        .f-item { margin-bottom: 16px; }
+        .f-item:last-child { margin-bottom: 0; }
+        .f-item .f-head {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .f-item .f-name { font-size: 14px; color: #303133; font-weight: 500; }
+        .f-item .f-score { font-size: 13px; color: #a262e6; font-weight: 600; }
+        .f-bar {
+            height: 8px; border-radius: 4px; background: #ebeef5; overflow: hidden;
+        }
+        .f-bar > i {
+            display: block; height: 100%; border-radius: 4px;
+            background: linear-gradient(90deg, #a262e6, #d88dee);
+            transition: width .6s ease;
+        }
+        .f-text { font-size: 13px; color: #606266; line-height: 1.7; margin-top: 8px; }
+
+        /* 总评 */
+        .overall {
+            background: linear-gradient(135deg, #faf5ff, #f0e6ff);
+            border: 1px solid rgba(162,98,230,.2);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .overall .o-label { font-size: 13px; color: #a262e6; margin-bottom: 10px; font-weight: 600; }
+        .overall .o-text { font-size: 15px; color: #303133; line-height: 1.8; }
+        .overall .o-stars { margin-top: 12px; color: #e6a23c; font-size: 18px; letter-spacing: 2px; }
+        .overall .o-star-num { font-size: 13px; color: #909399; margin-left: 6px; }
+
+        .disclaimer { font-size: 12px; color: #c0c4cc; text-align: center; margin-top: 8px; }
+
+        @media (max-width: 900px) {
+            .layout { flex-direction: column; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #ebeef5; }
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+
+    <!-- 左侧菜单（两级导航：一级点击展开/收起，默认收起；当前页面所在分组自动展开） -->
+<style>
+    /* ===== 两级导航样式（作用于侧边栏内部） ===== */
+    #app-menu { padding: 8px 0; }
+
+    /* 一级导航 */
+    #app-menu .menu-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        color: #303133;
+        cursor: pointer;
+        border-left: 3px solid transparent;
+        text-decoration: none;
+        user-select: none;
+    }
+    #app-menu .menu-item:hover { background: #f5f7fa; }
+    #app-menu .menu-item.active {
+        background: #ecf5ff;
+        color: #409eff;
+        border-left-color: #409eff;
+    }
+    #app-menu .menu-group-title { cursor: pointer; }
+    #app-menu .menu-group-title .caret {
+        font-size: 12px;
+        color: #c0c4cc;
+        transition: transform .2s ease;
+    }
+    #app-menu .menu-group.open > .menu-group-title .caret { transform: rotate(90deg); }
+    #app-menu .menu-group-title:hover .caret { color: #909399; }
+
+    /* 二级导航（与一级有明显视觉区别：缩进、更小字号、浅色背景胶囊） */
+    #app-menu .sub-menu {
+        display: none;
+        padding: 2px 0 6px;
+    }
+    #app-menu .menu-group.open > .sub-menu { display: block; }
+    #app-menu .sub-item {
+        display: block;
+        margin: 2px 12px 2px 28px;
+        padding: 7px 12px;
+        font-size: 13px;
+        color: #606266;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+    #app-menu .sub-item:hover { background: #f5f7fa; color: #409eff; }
+    #app-menu .sub-item.active {
+        background: #ecf5ff;
+        color: #409eff;
+        font-weight: 500;
+    }
+
+    /* 让侧边栏内容区可滚动、底部用户区固定 */
+    .sidebar { display: flex; flex-direction: column; }
+    #app-menu { flex: 1; overflow-y: auto; }
+
+    /* 底部用户区 */
+    .sidebar-user {
+        padding: 12px;
+        border-top: 1px solid #ebeef5;
+        background: #fafbfc;
+    }
+    .user-chip {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        padding: 6px 4px;
+    }
+    .user-chip .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f2b84b, #e89b26);
+        color: #fff;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .user-chip .user-meta { display: flex; flex-direction: column; min-width: 0; }
+    .user-chip .user-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #303133;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .user-chip .user-sub { font-size: 11px; color: #909399; margin-top: 2px; }
+    .logout-form { margin-top: 8px; }
+    .logout-btn {
+        display: block;
+        width: 100%;
+        padding: 7px 0;
+        text-align: center;
+        border: 1px solid #ebeef5;
+        border-radius: 4px;
+        background: #fff;
+        color: #606266;
+        font-size: 13px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all .2s;
+    }
+    .logout-btn:hover { border-color: #f56c6c; color: #f56c6c; }
+    .logout-btn.link { display: inline-block; width: 48%; }
+    .logout-btn.link.primary { background: #409eff; border-color: #409eff; color: #fff; }
+    .logout-btn.link.primary:hover { background: #66b1ff; border-color: #66b1ff; color: #fff; }
+    .guest-box .guest-tip {
+        font-size: 12px;
+        color: #909399;
+        text-align: center;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+    }
+</style>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">🐟 憨憨专属摸鱼网站</div>
+    <nav class="menu" id="app-menu">
+        <a class="menu-item " href="http://localhost">首页</a>
+
+
+
+        <div class="menu-group ">
+            <div class="menu-item menu-group-title">
+                摸鱼话题
+                <span class="caret">▸</span>
+            </div>
+            <div class="sub-menu">
+                <a class="sub-item " href="http://localhost/slack-topics/list">话题列表</a>
+                <a class="sub-item " href="http://localhost/slack-topics/create">创建话题</a>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+        <div class="menu-group  open ">
+            <div class="menu-item menu-group-title">
+                实用工具
+                <span class="caret">▸</span>
+            </div>
+            <div class="sub-menu">
+                <a class="sub-item " href="http://localhost/tools">工具导航</a>
+                <a class="sub-item  active " href="http://localhost/tools/fortune">八字算命</a>
+                <a class="sub-item " href="http://localhost/tools/qrcode">二维码生成</a>
+            </div>
+        </div>
+
+        <div class="menu-group ">
+            <div class="menu-item menu-group-title">
+                摸鱼游戏
+                <span class="caret">▸</span>
+            </div>
+            <div class="sub-menu">
+                <a class="sub-item " href="http://localhost/games">小游戏</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 底部用户区 -->
+    <div class="sidebar-user">
+                    <div class="guest-box">
+                <p class="guest-tip">登录后即可继续快乐摸鱼</p>
+                <a class="logout-btn link" href="http://localhost/login">登录</a>
+                <a class="logout-btn link primary" href="http://localhost/register">注册</a>
+            </div>
+            </div>
+</aside>
+
+<script>
+(function () {
+    var menu = document.getElementById('app-menu');
+    if (!menu) return;
+    var groups = menu.querySelectorAll('.menu-group');
+    Array.prototype.forEach.call(groups, function (group) {
+        var title = group.querySelector('.menu-group-title');
+        if (!title) return;
+        title.addEventListener('click', function () {
+            group.classList.toggle('open');
+        });
+    });
+})();
+</script>
+
+    <!-- 右侧主体 -->
+    <main class="main">
+
+        <!-- 顶部面包屑 -->
+        <div class="topbar">
+            实用工具
+            <span class="sep">/</span>
+            八字算命
+        </div>
+
+        <div class="tab-content">
+
+            
+            <!-- 输入卡片 -->
+            <div class="card">
+                <div class="card-title">输入生辰信息</div>
+                <div class="card-body">
+                    <form method="POST" action="http://localhost/tools/fortune">
+                        <input type="hidden" name="_token" value="">                        <div class="form-row">
+                            <div class="field form-group">
+                                <label>出生年份</label>
+                                <select name="year">
+                                                                                                                <option value="1900" >1900 年</option>
+                                                                            <option value="1901" >1901 年</option>
+                                                                            <option value="1902" >1902 年</option>
+                                                                            <option value="1903" >1903 年</option>
+                                                                            <option value="1904" >1904 年</option>
+                                                                            <option value="1905" >1905 年</option>
+                                                                            <option value="1906" >1906 年</option>
+                                                                            <option value="1907" >1907 年</option>
+                                                                            <option value="1908" >1908 年</option>
+                                                                            <option value="1909" >1909 年</option>
+                                                                            <option value="1910" >1910 年</option>
+                                                                            <option value="1911" >1911 年</option>
+                                                                            <option value="1912" >1912 年</option>
+                                                                            <option value="1913" >1913 年</option>
+                                                                            <option value="1914" >1914 年</option>
+                                                                            <option value="1915" >1915 年</option>
+                                                                            <option value="1916" >1916 年</option>
+                                                                            <option value="1917" >1917 年</option>
+                                                                            <option value="1918" >1918 年</option>
+                                                                            <option value="1919" >1919 年</option>
+                                                                            <option value="1920" >1920 年</option>
+                                                                            <option value="1921" >1921 年</option>
+                                                                            <option value="1922" >1922 年</option>
+                                                                            <option value="1923" >1923 年</option>
+                                                                            <option value="1924" >1924 年</option>
+                                                                            <option value="1925" >1925 年</option>
+                                                                            <option value="1926" >1926 年</option>
+                                                                            <option value="1927" >1927 年</option>
+                                                                            <option value="1928" >1928 年</option>
+                                                                            <option value="1929" >1929 年</option>
+                                                                            <option value="1930" >1930 年</option>
+                                                                            <option value="1931" >1931 年</option>
+                                                                            <option value="1932" >1932 年</option>
+                                                                            <option value="1933" >1933 年</option>
+                                                                            <option value="1934" >1934 年</option>
+                                                                            <option value="1935" >1935 年</option>
+                                                                            <option value="1936" >1936 年</option>
+                                                                            <option value="1937" >1937 年</option>
+                                                                            <option value="1938" >1938 年</option>
+                                                                            <option value="1939" >1939 年</option>
+                                                                            <option value="1940" >1940 年</option>
+                                                                            <option value="1941" >1941 年</option>
+                                                                            <option value="1942" >1942 年</option>
+                                                                            <option value="1943" >1943 年</option>
+                                                                            <option value="1944" >1944 年</option>
+                                                                            <option value="1945" >1945 年</option>
+                                                                            <option value="1946" >1946 年</option>
+                                                                            <option value="1947" >1947 年</option>
+                                                                            <option value="1948" >1948 年</option>
+                                                                            <option value="1949" >1949 年</option>
+                                                                            <option value="1950" >1950 年</option>
+                                                                            <option value="1951" >1951 年</option>
+                                                                            <option value="1952" >1952 年</option>
+                                                                            <option value="1953" >1953 年</option>
+                                                                            <option value="1954" >1954 年</option>
+                                                                            <option value="1955" >1955 年</option>
+                                                                            <option value="1956" >1956 年</option>
+                                                                            <option value="1957" >1957 年</option>
+                                                                            <option value="1958" >1958 年</option>
+                                                                            <option value="1959" >1959 年</option>
+                                                                            <option value="1960" >1960 年</option>
+                                                                            <option value="1961" >1961 年</option>
+                                                                            <option value="1962" >1962 年</option>
+                                                                            <option value="1963" >1963 年</option>
+                                                                            <option value="1964" >1964 年</option>
+                                                                            <option value="1965" >1965 年</option>
+                                                                            <option value="1966" >1966 年</option>
+                                                                            <option value="1967" >1967 年</option>
+                                                                            <option value="1968" >1968 年</option>
+                                                                            <option value="1969" >1969 年</option>
+                                                                            <option value="1970" >1970 年</option>
+                                                                            <option value="1971" >1971 年</option>
+                                                                            <option value="1972" >1972 年</option>
+                                                                            <option value="1973" >1973 年</option>
+                                                                            <option value="1974" >1974 年</option>
+                                                                            <option value="1975" >1975 年</option>
+                                                                            <option value="1976" >1976 年</option>
+                                                                            <option value="1977" >1977 年</option>
+                                                                            <option value="1978" >1978 年</option>
+                                                                            <option value="1979" >1979 年</option>
+                                                                            <option value="1980" >1980 年</option>
+                                                                            <option value="1981" >1981 年</option>
+                                                                            <option value="1982" >1982 年</option>
+                                                                            <option value="1983" >1983 年</option>
+                                                                            <option value="1984" >1984 年</option>
+                                                                            <option value="1985" >1985 年</option>
+                                                                            <option value="1986" >1986 年</option>
+                                                                            <option value="1987" >1987 年</option>
+                                                                            <option value="1988" >1988 年</option>
+                                                                            <option value="1989" >1989 年</option>
+                                                                            <option value="1990" >1990 年</option>
+                                                                            <option value="1991" >1991 年</option>
+                                                                            <option value="1992" >1992 年</option>
+                                                                            <option value="1993" >1993 年</option>
+                                                                            <option value="1994" >1994 年</option>
+                                                                            <option value="1995" >1995 年</option>
+                                                                            <option value="1996" >1996 年</option>
+                                                                            <option value="1997" >1997 年</option>
+                                                                            <option value="1998" >1998 年</option>
+                                                                            <option value="1999" >1999 年</option>
+                                                                            <option value="2000" >2000 年</option>
+                                                                            <option value="2001" >2001 年</option>
+                                                                            <option value="2002" >2002 年</option>
+                                                                            <option value="2003" >2003 年</option>
+                                                                            <option value="2004" >2004 年</option>
+                                                                            <option value="2005" >2005 年</option>
+                                                                            <option value="2006" >2006 年</option>
+                                                                            <option value="2007" >2007 年</option>
+                                                                            <option value="2008" >2008 年</option>
+                                                                            <option value="2009" >2009 年</option>
+                                                                            <option value="2010" >2010 年</option>
+                                                                            <option value="2011" >2011 年</option>
+                                                                            <option value="2012" >2012 年</option>
+                                                                            <option value="2013" >2013 年</option>
+                                                                            <option value="2014" >2014 年</option>
+                                                                            <option value="2015" >2015 年</option>
+                                                                            <option value="2016" >2016 年</option>
+                                                                            <option value="2017" >2017 年</option>
+                                                                            <option value="2018" >2018 年</option>
+                                                                            <option value="2019" >2019 年</option>
+                                                                            <option value="2020" >2020 年</option>
+                                                                            <option value="2021" >2021 年</option>
+                                                                            <option value="2022" >2022 年</option>
+                                                                            <option value="2023" >2023 年</option>
+                                                                            <option value="2024" >2024 年</option>
+                                                                            <option value="2025" >2025 年</option>
+                                                                            <option value="2026" >2026 年</option>
+                                                                    </select>
+                                                            </div>
+                            <div class="field form-group">
+                                <label>出生月份</label>
+                                <select name="month">
+                                                                            <option value="1" >1 月</option>
+                                                                            <option value="2" >2 月</option>
+                                                                            <option value="3" >3 月</option>
+                                                                            <option value="4" >4 月</option>
+                                                                            <option value="5" >5 月</option>
+                                                                            <option value="6" >6 月</option>
+                                                                            <option value="7" >7 月</option>
+                                                                            <option value="8" >8 月</option>
+                                                                            <option value="9" >9 月</option>
+                                                                            <option value="10" >10 月</option>
+                                                                            <option value="11" >11 月</option>
+                                                                            <option value="12" >12 月</option>
+                                                                    </select>
+                                                            </div>
+                            <div class="field form-group" style="flex: 2; min-width: 220px;">
+                                <label>籍贯地址（省 / 市，选填可更准）</label>
+                                <input type="text" name="hometown"
+                                       value=""
+                                       placeholder="例如：河南省郑州市 或 广东广州">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn">🔮 开始测算</button>
+                        <div class="btn-tip">同一出生信息的结果是固定的，仅作娱乐参考。</div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 结果区 -->
+            
+        </div>
+
+    </main>
+</div>
+</body>
+</html>
