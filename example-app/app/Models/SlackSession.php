@@ -93,6 +93,12 @@ class SlackSession extends Model
     public function secondsElapsed()
     {
         $anchor = $this->ended_at ?? now();
-        return max(0, $anchor->diffInSeconds($this->started_at));
+        // Carbon 的 diffInSeconds 在方向相反（结束时间早于开始时间）时也会返回正值绝对值，
+        // 因此不能依赖 max(0, ...) 拦截"反向时长"。必须显式判断结束时间不早于开始时间，
+        // 否则会产生虚增的非法时长（例如结算异常把 ended_at 写到 started_at 之前）。
+        if ($anchor->lte($this->started_at)) {
+            return 0;
+        }
+        return $anchor->diffInSeconds($this->started_at);
     }
 }
